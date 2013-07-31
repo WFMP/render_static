@@ -9,10 +9,10 @@ module RenderStatic
     class << self
       attr_accessor :base_path, :use_headless
     end
+    self.use_headless = true
 
     def initialize(app)
       @app = app
-      self.class.use_headless = true if self.class.use_headless.nil?
     end
 
     def call(env)
