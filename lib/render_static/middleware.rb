@@ -7,7 +7,13 @@ module RenderStatic
 
   class Middleware
     class << self
-      attr_accessor :base_path, :use_headless, :driver, :load_complete
+      attr_accessor :base_path, :use_headless, :driver
+      attr_reader :load_complete
+      
+      def load_complete=(proc)
+        raise "RenderStatic::Middleware.load_complete must be a Proc, not a #{proc.class.name}" unless proc.nil? || proc.is_a?(Proc)
+        @load_complete = proc
+      end
     end
     self.use_headless = true
     self.driver = :firefox

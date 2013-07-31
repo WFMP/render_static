@@ -90,4 +90,17 @@ describe RenderStatic::Middleware do
       
     end
   end
+  
+  describe ".load_complete" do
+    it "should raise an exception if assign a non-Proc value" do
+      expect { RenderStatic::Middleware.load_complete="string"}.to raise_error("RenderStatic::Middleware.load_complete must be a Proc, not a String")
+    end
+    
+    it "should not raise an exception if assigned a proc" do
+      expect { RenderStatic::Middleware.load_complete=proc { true } }.not_to raise_error
+    end
+    it "should not raise an exception if assigned nil" do
+      expect { RenderStatic::Middleware.load_complete = nil }.not_to raise_error
+    end
+  end
 end
