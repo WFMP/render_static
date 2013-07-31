@@ -7,7 +7,7 @@ module RenderStatic
 
   class Middleware
     class << self
-      attr_accessor :base_path, :use_headless, :driver
+      attr_accessor :base_path, :use_headless, :driver, :load_complete
     end
     self.use_headless = true
     self.driver = :firefox

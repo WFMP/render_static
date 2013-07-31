@@ -34,5 +34,18 @@ describe RenderStatic::Renderer do
       RenderStatic::Renderer.render(env)
     end
     
+    it "uses a custom wait block" do
+      RenderStatic::Middleware.load_complete = proc do |browser|
+        browser.find_element(:css, "#app_view.loading").empty?
+      end
+      wait = stub
+      
+      Selenium::WebDriver.should_receive(:for) { browser }
+      navigate.should_receive(:to).with(navigate_url)
+      
+      browser.should_receive(:find_element).with(:css, "#app_view.loading") { [] }
+      
+      RenderStatic::Renderer.render(env)
+    end
   end
 end
