@@ -64,6 +64,30 @@ describe RenderStatic::Middleware do
       app.should_receive(:call).with(env)
       RenderStatic::Renderer.should_not_receive(:render)
       middleware.call(env)
+      
+    end
+    
+    it "should render headless" do
+      env = request.merge("HTTP_USER_AGENT" => "Googlebot", "PATH_INFO" => "/somewhere/index.html")
+
+      app.should_not_receive(:call)
+      RenderStatic::Middleware.use_headless.should be true
+      Headless.should_receive(:ly)
+      
+      middleware.call(env)
+    end
+    
+    it "should not use headless" do
+      RenderStatic::Middleware.use_headless=false
+      env = request.merge("HTTP_USER_AGENT" => "Googlebot", "PATH_INFO" => "/somewhere/index.html")
+      
+      app.should_not_receive(:call)
+      RenderStatic::Middleware.use_headless.should be false
+      Headless.should_not_receive(:ly)
+      RenderStatic::Renderer.should_receive(:call_browser).with(env)
+      
+      middleware.call(env)
+      
     end
   end
 end
