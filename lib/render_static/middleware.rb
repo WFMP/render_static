@@ -7,17 +7,33 @@ module RenderStatic
 
   class Middleware
     class << self
-      attr_accessor :base_path, :use_headless, :driver
+      attr_accessor :use_headless, :driver, :bots
       attr_reader :load_complete
+      
+      def base_path=(value)
+        base_paths << value
+      end
+      def base_paths
+        @base_paths ||= []
+      end
       
       def load_complete=(proc)
         raise "RenderStatic::Middleware.load_complete must be a Proc, not a #{proc.class.name}" unless proc.nil? || proc.is_a?(Proc)
         @load_complete = proc
       end
     end
+    DEFAULT_BOTS = [
+        "Googlebot",
+        "Googlebot-Mobile",
+        "AdsBot-Google",
+        "Mozilla/5.0 (compatible; Ask Jeeves/Teoma; +http://about.ask.com/en/docs/about/webmasters.shtml)",
+        "Baiduspider",
+        "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+    ]
     self.use_headless = true
     self.driver = :firefox
-
+    self.bots = DEFAULT_BOTS
+    
     def initialize(app)
       @app = app
     end
@@ -37,21 +53,26 @@ module RenderStatic
     end
 
     def is_bot?(env)
-      [
-          "Googlebot",
-          "Googlebot-Mobile",
-          "AdsBot-Google",
-          "Mozilla/5.0 (compatible; Ask Jeeves/Teoma; +http://about.ask.com/en/docs/about/webmasters.shtml)",
-          "Baiduspider",
-          "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
-      ].include?(env["HTTP_USER_AGENT"])
+      self.class.bots.include?(env["HTTP_USER_AGENT"])
     end
 
     def is_renderable?(env)
       path = env["PATH_INFO"]
-      content_type = path.index(".") && path.split(".").last
 
-      path.start_with?(self.class.base_path) & [nil, "htm", "html"].include?(content_type) && env["REQUEST_METHOD"] == "GET"
+      path_match?(path) & content_type_match?(content_type(env)) && env["REQUEST_METHOD"] == "GET"
+    end
+    
+    def path_match?(path)
+      self.class.base_paths.any? { |base_path| path.start_with? base_path }
+    end
+    
+    def content_type_match?(content_type)
+      [nil, "htm", "html"].include?(content_type)
+    end
+    
+    def content_type(env)
+      path = env["PATH_INFO"]
+      path.index(".") && path.split(".").last
     end
   end
 end

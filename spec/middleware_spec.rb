@@ -10,8 +10,9 @@ describe RenderStatic::Middleware do
     }
   }
 
-  before do
+  before :all do
     RenderStatic::Middleware.base_path = "/somewhere/"
+    RenderStatic::Middleware.base_path = "/elsewhere/"
   end
 
   describe "a non-bot user agent" do
@@ -42,6 +43,14 @@ describe RenderStatic::Middleware do
       middleware.call(env)
     end
 
+    it "handles multiple base_paths" do
+      env = request.merge("HTTP_USER_AGENT" => "Googlebot", "PATH_INFO" => "/elsewhere/index.html")
+
+      app.should_not_receive(:call)
+      RenderStatic::Renderer.should_receive(:render).with(env)
+      middleware.call(env)
+    end
+    
     it "renders content without an explicit type" do
       env = request.merge("HTTP_USER_AGENT" => "Googlebot", "PATH_INFO" => "/somewhere/index")
 
@@ -101,6 +110,12 @@ describe RenderStatic::Middleware do
     end
     it "should not raise an exception if assigned nil" do
       expect { RenderStatic::Middleware.load_complete = nil }.not_to raise_error
+    end
+  end
+  
+  describe ".base_paths" do
+    it "should have two entries" do
+      expect(RenderStatic::Middleware.base_paths.size).to eq(2)
     end
   end
 end
