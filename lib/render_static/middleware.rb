@@ -7,9 +7,10 @@ module RenderStatic
 
   class Middleware
     class << self
-      attr_accessor :base_path, :use_headless
+      attr_accessor :base_path, :use_headless, :driver
     end
     self.use_headless = true
+    self.driver = :firefox
 
     def initialize(app)
       @app = app
