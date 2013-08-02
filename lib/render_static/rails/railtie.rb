@@ -1,4 +1,5 @@
 require 'rails'
+require 'render_static/rails/routes'
 
 module RenderStatic
   class Railtie < Rails::Railtie
