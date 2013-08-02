@@ -1,5 +1,6 @@
 require 'render_static/rails/railtie' if defined?(Rails)
 require 'render_static/renderer'
+require 'render_static/path_matcher/start_with'
 
 module RenderStatic
   class NotSeoFriendly < Exception
@@ -11,7 +12,7 @@ module RenderStatic
       attr_reader :load_complete
       
       def base_path=(value)
-        base_paths << value
+        base_paths << RenderStatic::PathMatcher::StartWith.new(value)
       end
       def base_paths
         @base_paths ||= []
@@ -63,7 +64,7 @@ module RenderStatic
     end
     
     def path_match?(path)
-      self.class.base_paths.any? { |base_path| path.start_with? base_path }
+      self.class.base_paths.any? { |base_path| base_path.matches? path }
     end
     
     def content_type_match?(content_type)
