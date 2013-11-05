@@ -10,7 +10,7 @@ module RenderStatic
 
   class Middleware
     class << self
-      attr_accessor :use_headless, :driver, :bots
+      attr_accessor :use_headless, :driver, :bots, :logger
       attr_reader :load_complete
       
       def base_path=(value)
@@ -60,12 +60,15 @@ module RenderStatic
     self.driver = :firefox
     self.initialize_bots(DEFAULT_BOTS)
     
+    
     def initialize(app)
       @app = app
     end
 
     def call(env)
       if will_render?(env)
+        logger = self.class.logger || env['rack.errors']
+        logger.info("User-Agent: #{env['HTTP_USER_AGENT']} recognized as a bot. RenderStatic::Renderer invoked.")
         RenderStatic::Renderer.render(env)
       else
         @app.call(env)
