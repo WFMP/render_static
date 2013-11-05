@@ -118,4 +118,60 @@ describe RenderStatic::Middleware do
       expect(RenderStatic::Middleware.base_paths.size).to eq(2)
     end
   end
+  
+  describe "a include matcher" do
+    let(:include_bots) { [{matcher: :include, user_agent: 'Googlebot'}, {matcher: :start_with, user_agent: 'AdsBot-Google'} ] }
+    before :all do
+      RenderStatic::Middleware.initialize_bots(include_bots)
+    end
+    it "should have 2 bots" do
+      expect(RenderStatic::Middleware.bots.size).to eq(2)
+    end
+    it "should match and render" do
+      env = request.merge("HTTP_USER_AGENT" => "Googlebot", "PATH_INFO" => "/somewhere/index.html")
+
+      app.should_not_receive(:call)
+      RenderStatic::Renderer.should_receive(:render).with(env)
+      middleware.call(env)
+    end
+    it "should match and render" do
+      env = request.merge("HTTP_USER_AGENT" => "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)", "PATH_INFO" => "/somewhere/index.html")
+
+      app.should_not_receive(:call)
+      RenderStatic::Renderer.should_receive(:render).with(env)
+      middleware.call(env)
+    end
+    it "should match and render" do
+      env = request.merge("HTTP_USER_AGENT" => "Googlebot/2.1 (+http://www.google.com/bot.html)", "PATH_INFO" => "/somewhere/index.html")
+
+      app.should_not_receive(:call)
+      RenderStatic::Renderer.should_receive(:render).with(env)
+      middleware.call(env)
+    end
+    it "should match and render" do
+      env = request.merge("HTTP_USER_AGENT" => "AdsBot-Google (+http://www.google.com/adsbot.html)", "PATH_INFO" => "/somewhere/index.html")
+
+      app.should_not_receive(:call)
+      RenderStatic::Renderer.should_receive(:render).with(env)
+      middleware.call(env)
+    end
+    it "should not match a bot and pass through" do
+      env = request.merge("HTTP_USER_AGENT" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AdsBot-Google")
+
+      app.should_receive(:call).with(env)
+      RenderStatic::Renderer.should_not_receive(:render)
+
+      middleware.call(env)
+    end
+    
+    it "should not match a bot and pass through" do
+      env = request.merge("HTTP_USER_AGENT" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31")
+
+      app.should_receive(:call).with(env)
+      RenderStatic::Renderer.should_not_receive(:render)
+
+      middleware.call(env)
+    end
+    
+  end
 end

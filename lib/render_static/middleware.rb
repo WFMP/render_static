@@ -24,6 +24,29 @@ module RenderStatic
         raise "RenderStatic::Middleware.load_complete must be a Proc, not a #{proc.class.name}" unless proc.nil? || proc.is_a?(Proc)
         @load_complete = proc
       end
+      def initialize_bots(bots_array)
+        bots_array = ([] << bots_array) unless bots_array.is_a? Array
+        @bots = []
+        bots_array.each do |bot|
+          case bot
+          when String
+            @bots << RenderStatic::Matcher::Exact.new(bot)
+          when Hash
+            matcher = bot[:matcher]
+            user_agent = bot[:user_agent]
+            if matcher && user_agent && !(user_agent.nil? || user_agent.empty?)
+              case matcher
+              when :exact
+                @bots << RenderStatic::Matcher::Exact.new(user_agent)
+              when :start_with
+                @bots << RenderStatic::Matcher::StartWith.new(user_agent)
+              when :include
+                @bots << RenderStatic::Matcher::Includes.new(user_agent)
+              end
+            end
+          end
+        end
+      end
     end
     DEFAULT_BOTS = [
         "Googlebot",
@@ -35,7 +58,7 @@ module RenderStatic
     ]
     self.use_headless = true
     self.driver = :firefox
-    self.bots = DEFAULT_BOTS
+    self.initialize_bots(DEFAULT_BOTS)
     
     def initialize(app)
       @app = app
@@ -56,7 +79,7 @@ module RenderStatic
     end
 
     def is_bot?(env)
-      self.class.bots.include?(env["HTTP_USER_AGENT"])
+      self.class.bots.any? { |bot| bot.matches?(env["HTTP_USER_AGENT"]) }
     end
 
     def is_renderable?(env)
