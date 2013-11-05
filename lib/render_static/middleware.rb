@@ -68,7 +68,7 @@ module RenderStatic
     def call(env)
       if will_render?(env)
         logger = self.class.logger || env['rack.errors']
-        logger.info("User-Agent: #{env['HTTP_USER_AGENT']} recognized as a bot. RenderStatic::Renderer invoked.")
+        logger.info("Request from #{env['REMOTE_ADDR']} with User-Agent: #{env['HTTP_USER_AGENT']} recognized as a bot.")
         RenderStatic::Renderer.render(env)
       else
         @app.call(env)
