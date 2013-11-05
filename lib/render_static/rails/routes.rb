@@ -1,7 +1,7 @@
 # require "active_support/core_ext/object/try"
 # require "active_support/core_ext/hash/slice"
-require 'render_static/path_matcher/exact'
-require 'render_static/path_matcher/start_with'
+require 'render_static/matcher/exact'
+require 'render_static/matcher/start_with'
 module ActionDispatch::Routing
   class Mapper
     def get(*args, &block)
