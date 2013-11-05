@@ -8,7 +8,7 @@ module ActionDispatch::Routing
       options = args.extract_options!
       if crawl = options.delete(:crawlable)
         path = args[0]
-        RenderStatic::Middleware.base_paths << RenderStatic::PathMatcher::StartWith.new(path)
+        RenderStatic::Middleware.base_paths << RenderStatic::Matcher::StartWith.new(path)
         options[:anchor] ||= false
       end
       args.push(options)
@@ -18,9 +18,9 @@ module ActionDispatch::Routing
     def root(options={})
       if crawl = options.delete(:crawlable)
         if crawl.to_sym == :exact
-          RenderStatic::Middleware.base_paths << RenderStatic::PathMatcher::Exact.new('/')
+          RenderStatic::Middleware.base_paths << RenderStatic::Matcher::Exact.new('/')
         else
-          RenderStatic::Middleware.base_paths << RenderStatic::PathMatcher::StartWith.new('/')
+          RenderStatic::Middleware.base_paths << RenderStatic::Matcher::StartWith.new('/')
         end
       end
       super(options)
