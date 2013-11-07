@@ -23,6 +23,7 @@ module RenderStatic
     def self.call_browser(env)
       browser = Selenium::WebDriver.for(RenderStatic::Middleware.driver)
       path = "#{env["rack.url_scheme"]}://#{env["HTTP_HOST"]}#{env["REQUEST_PATH"]}"
+      RenderStatic::Middleware.logger.info("RenderStatic::Renderer - Rendering #{path} with #{RenderStatic::Middleware.driver}") if RenderStatic::Middleware.logger
       browser.navigate.to(path)
       self.wait_for_load_complete(browser)
       [200, { "Content-Type" => "text/html" }, [browser.page_source]] # TODO status code not supported by selenium
