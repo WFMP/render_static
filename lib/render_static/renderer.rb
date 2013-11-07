@@ -26,7 +26,6 @@ module RenderStatic
       path = request.url
       if RenderStatic::Middleware.logger
         RenderStatic::Middleware.logger.info("RenderStatic::Renderer - Rendering #{path} with #{RenderStatic::Middleware.driver}") 
-        RenderStatic::Middleware.logger.info("env:\n#{env}")
       end
       browser.navigate.to(path)
       self.wait_for_load_complete(browser)
