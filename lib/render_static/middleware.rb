@@ -40,7 +40,11 @@ module RenderStatic
                 @bots << RenderStatic::Matcher::Exact.new(user_agent)
               when :start_with
                 @bots << RenderStatic::Matcher::StartWith.new(user_agent)
+              when :starts_with
+                @bots << RenderStatic::Matcher::StartWith.new(user_agent)
               when :include
+                @bots << RenderStatic::Matcher::Includes.new(user_agent)
+              when :includes
                 @bots << RenderStatic::Matcher::Includes.new(user_agent)
               end
             end
