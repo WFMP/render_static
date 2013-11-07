@@ -3,7 +3,7 @@ module RenderStatic
   module Matcher
     class StartWith < RenderStatic::Matcher::Base
       def matches?(str)
-        str.start_with? match
+        (!str.nil?) && str.start_with?(match)
       end
     end
   end

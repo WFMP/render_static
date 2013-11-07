@@ -3,7 +3,7 @@ module RenderStatic
   module Matcher
     class Exact < RenderStatic::Matcher::Base 
       def matches?(str)
-        match == str
+        (!str.nil?) && match == str
       end
     end
   end
