@@ -71,9 +71,9 @@ module RenderStatic
 
     def call(env)
       if will_render?(env)
-        logger = self.class.logger || env['rack.errors']
-        logger.info("Request from #{env['REMOTE_ADDR']} with User-Agent: #{env['HTTP_USER_AGENT']} recognized as a bot.")
-        RenderStatic::Renderer.render(env)
+        request = Rack::Request.new(env)
+        logger.info("Request from #{request.ip} with User-Agent: #{request.user_agent} recognized as a bot.")
+        RenderStatic::Renderer.render(env,request)
       else
         @app.call(env)
       end
@@ -106,6 +106,10 @@ module RenderStatic
     def content_type(env)
       path = env["PATH_INFO"]
       path.index(".") && path.split(".").last
+    end
+    
+    def logger
+      self.class.logger || env['action_dispatch.logger'] || env['rack.errors']
     end
   end
 end
